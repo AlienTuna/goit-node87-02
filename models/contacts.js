@@ -1,57 +1,36 @@
-const fs = require('fs/promises');
-const { randomUUID } = require('crypto');
-const path = require('path');
+// const fs = require('fs/promises');
+// const { randomUUID } = require('crypto');
+// const path = require('path');
+// const { HttpError } = require('../utils');
 const { HttpError } = require('../utils');
+const Contact = require('./contactsModel');
 
-const contactsPath = path.resolve('models', 'contacts.json');
+// const contactsPath = path.resolve('models', 'contacts.json');
 
-const updateContactsFile = (data) => {
-  fs.writeFile(contactsPath, JSON.stringify(data))
-}
+// const updateContactsFile = (data) => {
+//   fs.writeFile(contactsPath, JSON.stringify(data))
+// }
 
-const listContacts = async () => {
-  const result = await fs.readFile(contactsPath);
-  return JSON.parse(result);
-}
+const listContacts = async () => await Contact.find();
 
-const getContactById = async (contactId) => {
-  const contacts = await listContacts();
-  const result = contacts.find(el => el.id === contactId);
-  return result;
-}
+const getContactById = async (contactId) => await Contact.findById(contactId);
 
-const removeContact = async (contactId) => {
-  const contactsList = await listContacts();
-  const indx = contactsList.findIndex(el => el.id === contactId);
+const removeContact = async (contactId) => await Contact.findByIdAndDelete(contactId);
 
-  if (indx === -1) throw new HttpError(404, `Not found`)
+const addContact = async (newContact) => await Contact.create(newContact);
+
+const updateStatusContact = async (contactId, body) => {
+  try {
+    const res = await Contact.findByIdAndUpdate(contactId, body, {new: true});
+    return res;
+  } catch (error) {
+    throw new HttpError(404, 'Not found!');
+  }
   
-  const result = contactsList.splice(indx, 1);
-  await updateContactsFile(contactsList);
-  return result;
-}
 
-const addContact = async (newContact) => {
-  const contactsList = await listContacts();
-  const newContactResult = {
-    ...newContact,
-    id: randomUUID(),
-  };
-  contactsList.push(newContactResult);
-  await updateContactsFile(contactsList);
-  return newContactResult;
-}
+};
 
-const updateContact = async (contactId, body) => {
-  const contactsList = await listContacts();
-  const indx = contactsList.findIndex((el) => el.id === contactId);
-
-  if (indx === -1) throw new HttpError(404, `Not found`)
-
-  contactsList[indx] = { ...contactsList[indx], ...body };
-  await updateContactsFile(contactsList);
-  return contactsList[indx];
-}
+const updateContact = async (contactId, body) => await Contact.findByIdAndUpdate(contactId, body, {new: true});
 
 module.exports = {
   listContacts,
@@ -59,4 +38,5 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 }
