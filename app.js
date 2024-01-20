@@ -3,10 +3,22 @@ const logger = require('morgan')
 const cors = require('cors')
 
 const contactsRouter = require('./routes/api/contacts')
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+
+dotenv.config({path: './envs/dev.env'});
+
+mongoose.connect(process.env.MONGO_URL + process.env.MONGO_SCHEMA)
+  .then( () => console.log('Database connection successful'))
+  .catch((err) => {
+    console.log(err.message);
+    process.exit(1);
+  })
 
 const app = express()
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
+
 
 app.use(logger(formatsLogger))
 app.use(cors())
@@ -19,7 +31,7 @@ app.use((req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message })
+  res.status(err.status ?? 500).json({ message: err.message })
 })
 
 module.exports = app

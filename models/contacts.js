@@ -1,14 +1,30 @@
-// const fs = require('fs/promises')
+// const fs = require('fs/promises');
+// const { randomUUID } = require('crypto');
+// const path = require('path');
+// const { HttpError } = require('../utils');
+const { HttpError } = require('../utils');
+const Contact = require('./contactsModel');
 
-const listContacts = async () => {}
+// const contactsPath = path.resolve('models', 'contacts.json');
 
-const getContactById = async (contactId) => {}
+// const updateContactsFile = (data) => {
+//   fs.writeFile(contactsPath, JSON.stringify(data))
+// }
 
-const removeContact = async (contactId) => {}
+const listContacts = async () => await Contact.find();
 
-const addContact = async (body) => {}
+const getContactById = async (contactId) => await Contact.findById(contactId);
 
-const updateContact = async (contactId, body) => {}
+const removeContact = async (contactId) => await Contact.findByIdAndDelete(contactId);
+
+const addContact = async (newContact) => await Contact.create(newContact);
+
+const updateStatusContact = async (contactId, body) => {
+  try {return await Contact.findByIdAndUpdate(contactId, body, {new: true})}
+  catch (error) { throw new HttpError(404, 'Not found!');}
+};
+
+const updateContact = async (contactId, body) => await Contact.findByIdAndUpdate(contactId, body, {new: true});
 
 module.exports = {
   listContacts,
@@ -16,4 +32,5 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 }
