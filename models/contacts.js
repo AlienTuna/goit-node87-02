@@ -20,14 +20,8 @@ const removeContact = async (contactId) => await Contact.findByIdAndDelete(conta
 const addContact = async (newContact) => await Contact.create(newContact);
 
 const updateStatusContact = async (contactId, body) => {
-  try {
-    const res = await Contact.findByIdAndUpdate(contactId, body, {new: true});
-    return res;
-  } catch (error) {
-    throw new HttpError(404, 'Not found!');
-  }
-  
-
+  try {return await Contact.findByIdAndUpdate(contactId, body, {new: true})}
+  catch (error) { throw new HttpError(404, 'Not found!');}
 };
 
 const updateContact = async (contactId, body) => await Contact.findByIdAndUpdate(contactId, body, {new: true});
