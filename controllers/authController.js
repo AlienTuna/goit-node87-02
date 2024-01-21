@@ -1,8 +1,11 @@
 const bcrypt = require("bcrypt");
+const fs = require('fs/promises');
+const path = require("path");
+const Jimp = require("jimp");
 
 const User = require("../models/usersModel");
 const { catchAsync, HttpError, userValidators } = require("../utils");
-const { jwtServices } = require("../services");
+const { jwtServices, usersService } = require("../services");
 
 const signupUserController = catchAsync(async (req, res) => {
     const {error} = userValidators.registerUserValidator(req.body);
@@ -69,9 +72,45 @@ const currentUserController = catchAsync(async (req, res) => {
     });
 });
 
+const uploadUserAvatar = catchAsync(async (req, res) => {
+   const updateUserAvatar = await usersService.updateUserAvatarService(req.body, req.user, req.file);
+
+   res.status(200).json({
+    avatarURL: req.user.avatar
+   });
+
+   return updateUserAvatar;
+});
+
+const updateAvatar = catchAsync(async (req, res, next) => {
+    if (!req.file) throw new HttpError(400, 'Missing image file')
+
+    const avatarsPath = path.resolve('public', 'avatars');
+  
+    const { path: oldPath } = req.file;
+    const userId = req.user.id;
+  
+    const jimpAvtar = await Jimp.read(oldPath);
+    await jimpAvtar.resize(250, 250).quality(60).write(oldPath);
+
+    const extension = req.file.mimetype.split('/')[1]
+    const newName = `${userId}.${extension}`;
+    const newPath = path.join(avatarsPath, newName);
+    const avatarURL = path.join('avatars', newName);
+
+    await fs.rename(oldPath, newPath);
+    
+  
+    await User.findByIdAndUpdate(userId, { avatarURL });
+  
+    res.status(200).json({ avatarURL });
+  });
+
 module.exports = {
     signupUserController,
     loginUserController,
     logoutUserController,
     currentUserController,
+    uploadUserAvatar,
+    updateAvatar
 };

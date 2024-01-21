@@ -1,4 +1,5 @@
 const { model, Schema } = require('mongoose');
+const crypto = require('crypto');
 
 
 const userSchema = new Schema({
@@ -20,7 +21,18 @@ const userSchema = new Schema({
         type: String,
         default: null,
     },
+    avatarURL: String,
 })
+
+userSchema.pre('save', async function (next) {
+    if (this.isNew) {
+        const emailHash = crypto.createHash('md5').update(this.email).digest('hex');
+
+        this.avatarURL = `https://www.gravatar.com/avatar/${emailHash}.jpg?d=identicon`;
+    }
+
+}
+)
 
 const User = model('User', userSchema);
 

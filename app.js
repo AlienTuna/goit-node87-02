@@ -16,14 +16,17 @@ mongoose.connect(MONGO_URL + MONGO_SCHEMA)
     process.exit(1);
   })
 
-const app = express()
+const app = express();
 
-const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
+const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
 
+app.use(express.static('public'));
 
-app.use(logger(formatsLogger))
-app.use(cors())
-app.use(express.json())
+app.use(logger(formatsLogger));
+app.use(cors());
+app.use(express.json());
+
+app.use(express.static('public'));
 
 app.use('/api/contacts', contactsRouter);
 app.use('/api/users', authRouter);
@@ -35,5 +38,6 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   res.status(err.status ?? 500).json({ message: err.message })
 })
+
 
 module.exports = app
