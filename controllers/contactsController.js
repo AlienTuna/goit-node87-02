@@ -16,14 +16,14 @@ const { catchAsync, contactValidators, HttpError } = require('../utils');
 
 
 const listContactsController = catchAsync(async (req, res) => {
-    const result = await listContacts();
+    const result = await listContacts(req);
     res.json(result);
 })
 
 const getContactByIdController = catchAsync(async (req, res) => {
     const { contactId } = req.params;
-    const result = await getContactById(contactId);
-    console.log(result)
+    const ownerId = req.user.id;
+    const result = await getContactById(contactId, ownerId);
     if (!result) {
         res.status(404).json({ message: `Not found` })
     }
@@ -32,7 +32,8 @@ const getContactByIdController = catchAsync(async (req, res) => {
 
 const removeContactController = catchAsync(async (req, res) => {
     const { contactId } = req.params;
-    const result = await removeContact(contactId);
+    const ownerId = req.user.id;
+    const result = await removeContact(contactId, ownerId);
 
     if (!result) throw new HttpError(404, `Not found`)
 
@@ -43,7 +44,7 @@ const addContactController = catchAsync(async (req, res) => {
     const { error } = contactValidators.addContactValidator(req.body);
     if (error) throw new HttpError(400, error)
 
-    const result = await addContact(req.body);
+    const result = await addContact(req.body, req.user);
 
     res.status(201).json(result);
 })
@@ -51,11 +52,12 @@ const addContactController = catchAsync(async (req, res) => {
 const updateContactController = catchAsync(async (req, res) => {
     const { contactId } = req.params;
     const {name, phone, email, favorite} = req.body;
+    const ownerId = req.user.id;
 
     const { error } = contactValidators.updateContactValidator(req.body);
     if (error) throw new HttpError(400, error)
 
-    const result = await updateContact(contactId, {name, phone, email, favorite})
+    const result = await updateContact(contactId, ownerId, {name, phone, email, favorite})
 
     if(!result) throw new HttpError(500, result)
 
@@ -66,10 +68,11 @@ const updateContactController = catchAsync(async (req, res) => {
 const updateStatusContactController = catchAsync( async (req, res) => {
     const { contactId } = req.params;
     const {favorite} = req.body;
+    const ownerId = req.user.id;
 
-    if(favorite === undefined) throw new HttpError(400, 'missing field favorite');
+    if(typeof favorite !== 'boolean') throw new HttpError(400, 'missing field favorite');
 
-    const result = await updateStatusContact(contactId, {favorite});
+    const result = await updateStatusContact(contactId, ownerId, {favorite});
   
     if(!result) throw new HttpError(404, 'Not found');
 

@@ -1,3 +1,5 @@
-// const { Router } = require('express');
+const authMiddleware = require('./authMiddleware');
 
-// const router = Router();
+module.exports = {
+    authMiddleware,
+}

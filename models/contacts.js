@@ -1,30 +1,29 @@
-// const fs = require('fs/promises');
-// const { randomUUID } = require('crypto');
-// const path = require('path');
-// const { HttpError } = require('../utils');
 const { HttpError } = require('../utils');
 const Contact = require('./contactsModel');
 
-// const contactsPath = path.resolve('models', 'contacts.json');
+const listContacts = async (req) => await Contact.find({ owner: req.user.id });
 
-// const updateContactsFile = (data) => {
-//   fs.writeFile(contactsPath, JSON.stringify(data))
-// }
+const getContactById = async (contactId, ownerId) => await Contact.findOne({_id: contactId, owner: ownerId });
 
-const listContacts = async () => await Contact.find();
+const removeContact = async (contactId, ownerId) => await Contact.findOneAndDelete({_id: contactId, owner: ownerId });
 
-const getContactById = async (contactId) => await Contact.findById(contactId);
+const addContact = (newContact, owner) => {
+  const {name, email, phone } = newContact;
 
-const removeContact = async (contactId) => await Contact.findByIdAndDelete(contactId);
+  return Contact.create({
+    name,
+    email,
+    phone,
+    owner,
+  });
+}
 
-const addContact = async (newContact) => await Contact.create(newContact);
-
-const updateStatusContact = async (contactId, body) => {
-  try {return await Contact.findByIdAndUpdate(contactId, body, {new: true})}
+const updateStatusContact = async (contactId, ownerId, body) => {
+  try {return await Contact.findOneAndUpdate({ _id: contactId, owner: ownerId }, body, {new: true})}
   catch (error) { throw new HttpError(404, 'Not found!');}
 };
 
-const updateContact = async (contactId, body) => await Contact.findByIdAndUpdate(contactId, body, {new: true});
+const updateContact = async (contactId, ownerId, body) => await Contact.findByIdAndUpdate({_id: contactId, owner: ownerId }, body, {new: true});
 
 module.exports = {
   listContacts,
