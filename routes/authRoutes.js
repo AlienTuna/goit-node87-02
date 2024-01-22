@@ -7,7 +7,7 @@ const { authMiddleware,
 const authRouter = express.Router();
 
 
-authRouter.post('/signup', authController.signupUserController);
+authRouter.post('/signup', authController.signupUserController, authController.sendVerifyEmailController);
 
 authRouter.post('/login', authController.loginUserController);
 

@@ -8,8 +8,6 @@ const User = require("../models/usersModel");
 const { catchAsync, HttpError, userValidators } = require("../utils");
 const { jwtServices, usersService } = require("../services");
 
-const { BASE_URL } = process.env;
-
 const signupUserController = catchAsync(async (req, res) => {
     const { error } = userValidators.registerUserValidator(req.body);
     if (error) throw new HttpError(400, error);
@@ -150,8 +148,9 @@ const sendVerifyEmailController = catchAsync(async (req, res) => {
             port: 587 ,
             auth: {
                 user: 'postmaster@sandbox35220b3fee8343a4b88c663501177283.mailgun.org',
-                pass: '833dc0bf39b38a0f71ac671caadb6847-4c955d28-28312ff9',
+                pass: '9cddfa46cc7c56ffcabe7f1a160a180e-063062da-34d5bb46',
             }
+            // 4d60573d93aa549692510a6ec3073076-063062da-2e2c845f
         })
 
         const verifyEmailConf = {
