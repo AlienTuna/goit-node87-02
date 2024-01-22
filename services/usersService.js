@@ -1,5 +1,7 @@
 const User = require("../models/usersModel");
+const { HttpError } = require("../utils");
 const ImageService = require("./ImageService");
+const crypto = require('crypto');
 
 exports.checkUserByToken = async (token) => {
     const currentUser = await User.findOne({ token })
@@ -20,4 +22,19 @@ exports.updateUserAvatarService = async (userData, user, file) => {
             user.id
         );
     }
+}
+
+exports.verifyUserService = async(otp) => {
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    const user = await User.findOne({
+        verificationToken: hashedOtp,
+    })
+
+    if(!user) throw new HttpError(404, 'User not found');
+
+    user.verify = true;
+    user.verificationToken = null;
+
+    await user.save();
 }

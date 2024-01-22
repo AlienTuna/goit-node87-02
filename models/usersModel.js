@@ -22,6 +22,14 @@ const userSchema = new Schema({
         default: null,
     },
     avatarURL: String,
+    verify: {
+        type: Boolean,
+        default: false,
+    },
+    verificationToken: {
+        type: String,
+        // required: [true, 'Verify token is required'],
+    },
 })
 
 userSchema.pre('save', async function (next) {
@@ -33,6 +41,14 @@ userSchema.pre('save', async function (next) {
 
 }
 )
+
+userSchema.methods.createVerifyToken = function() {
+    const token = crypto.randomBytes(30).toString('hex');
+
+    this.verificationToken = crypto.createHash('sha256').update(token).digest('hex');
+    
+    return token;
+}
 
 const User = model('User', userSchema);
 

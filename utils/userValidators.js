@@ -5,8 +5,8 @@ exports.registerUserValidator = (data) =>
         .object()
         .options({ abortEarly: false })
         .keys({
-            password: Joi.string().min(6).required().messages({"any.required": `missed required password field`,}),
-            email: Joi.string().email().required().messages({"any.required": `missed required email field`,}),
+            password: Joi.string().min(6).required(),
+            email: Joi.string().email().required(),
         })
         .validate(data);
 
@@ -17,5 +17,14 @@ exports.loginUserValidator = (data) =>
         .keys({
             password: Joi.string().required(),
             email: Joi.string().required(),
+        })
+        .validate(data);
+
+exports.sendVerifyEmailValidator = (data) =>
+    Joi
+        .object()
+        .options({ abortEarly: false })
+        .keys({
+            email: Joi.string().email().required(),
         })
         .validate(data);
